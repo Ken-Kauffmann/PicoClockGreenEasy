@@ -72,7 +72,8 @@ private:
     int m_WxWindFuncIdx = 3;            
     int m_WxWindDirectionFuncIdx = 4;      
     int m_WxHumidityFuncIdx = 5;        
-    int m_WxLastUpdateFuncIdx = 9;      
+    int m_WxLastUpdateFuncIdx = 9;
+    int m_WxMenuIdx = 0;                // Index value of Weather submenu in root menu.  Filled in during construction      
 
     Stopwatch *m_stopwatchFunc = nullptr;
     Countdown *m_countdownFunc = nullptr;

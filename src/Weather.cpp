@@ -29,7 +29,7 @@ void Weather::startWxSync()
         using namespace std::placeholders;                                      // When connected, onWifiConnectionFinished is called
         if (Wifi::connectAsync(std::bind(&Weather::onWifiConnectionFinished, this, _1)))
         {
-            TRACE << "Wifi::connectAsync started";                             
+            TRACE << "Return from Wifi::connectAsync started";                             
         } 
     } else                                                                       
     {                                                                            
@@ -52,25 +52,17 @@ void Weather::onRequestComplete(const std::string &content)                     
 {   
     std::string tempstr2;                                                        // Used in populating WxInfo
     int tempInt = 0;                                                             // Used in populating WxInfo
-    std::string json;                                                            // Holds json string in populating WxInfo 
+    std::string json;                                                            // Holds json string in populating WxInfo
+    time_t WxTime = 0;                                                           // Temp field to calculate local time   
+    tm Wxtm = {};                                                                // Temp field for trace
     TRACE << "In Weather::onRequestComplete: \n";
     TRACE << m_httpReq->content() ;
     json = m_httpReq->content();                                                 // Copy result string from receive buffer
 
-    if (json.size() < 1)                                                         // assume Wifi link failure, disconnect
+    if (json.size() < 1)                                                         // assume Wifi link failure, reboot to clean up
     {
-//        TRACE << "In Weather::onRequestComplete: Resetting HttpRequest \n";
-//        m_httpReq.reset();    // Trying to address httpc_result = 4, unexpectedly closed by remote server, panic issue
-//        Wifi::deinit();     // These two lock up the clock immediately
-//        Wifi::init();
-        TRACE << "In Weather::onRequestComplete:, calling Wifi::disconnect \n"; 
-        Wifi::disconnect();  
-//        TRACE << "In Weather::onRequestComplete:, calling Wifi::cycle_sta_mode \n";
-//        Wifi::cycle_sta_mode(); 
-//        m_httpReq = std::make_unique<HttpRequest>();  // re-establish the http stack
-//        using namespace std::placeholders;
-//        TRACE << "In Weather::onRequestComplete:, calling setOnCompleteCallback during reset of HttpRequest \n"; 
-//        m_httpReq->setOnCompleteCallback(std::bind(&Weather::onRequestComplete, this, _1));  
+        TRACE << "In Weather::onRequestComplete: Executing Weather::software_reset \n"; 
+        Weather::software_reset(); 
         return;
     }    
 
@@ -116,6 +108,9 @@ void Weather::onRequestComplete(const std::string &content)                     
     tempstr2 = Weather::extract(json, "dt");
     m_wxInfo.wxDateTime = std::stoull(tempstr2);
     TRACE << "wxDateTime: " << tempstr2;
+    WxTime = m_wxInfo.wxDateTime + m_wxInfo.wxTimezone;                           //  Remove the UTC offset in seconds.  This gives local time
+    Wxtm = *localtime(&WxTime);
+    TRACE << "Time of Last Update: " << Wxtm;                                     // give us a readable time in the trace     
 }
 
 std::string Weather::extract(const std::string &json, const std::string &name)    // Extract Integers and Floating Point
@@ -180,3 +175,9 @@ void Weather::wxInfo(WxInfo &info)                                          // U
 {                                                               
     info = m_wxInfo;                                                        // m_wxInfo is a pointer to WxInfo structure in Clock.h 
 }                                                             
+
+void Weather::software_reset()
+{
+    watchdog_enable(1, 1);
+    while(1);
+}

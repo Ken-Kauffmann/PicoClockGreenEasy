@@ -79,7 +79,8 @@ namespace
             "Sunset: ",                 
             "Weather for: ",            
             "Update Weather Now",       
-            "Last Update: ",                        
+            "Last Update: ",
+            "Software Reset",                        
 
     };
 }

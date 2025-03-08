@@ -7,7 +7,7 @@
 
 namespace
 {
-    const int MONITOR_CONNECTION_PERIOD_MS = 100;
+    const int MONITOR_CONNECTION_PERIOD_MS = 1000; // kdk changed from 100
 }
 
 Wifi::Status Wifi::m_connectResult = Wifi::Unknown;
@@ -63,7 +63,7 @@ bool Wifi::connectAsync(const std::function<void(bool)> &finishedCallback)
 
     if (res == 0) 
     {
-        TRACE << "Connection was started successfully";
+        TRACE << "Connection was started successfully, monitorConnection is next";
 
         m_connectionFinishedCallbacks.push_back(finishedCallback);
 
@@ -79,8 +79,10 @@ bool Wifi::connectAsync(const std::function<void(bool)> &finishedCallback)
 int64_t Wifi::monitorConnection(alarm_id_t id, void *user_data)
 {
     int res = cyw43_tcpip_link_status(&cyw43_state, CYW43_ITF_STA);
+//    TRACE << "monitorConnection link status";
+//    TRACE << "res:" << res;
     
-    if (res == CYW43_LINK_JOIN || res == CYW43_LINK_NOIP)
+    if (res == CYW43_LINK_JOIN || res == CYW43_LINK_NOIP)  // if res is 1 or 2
     {
         // Reschedule the same alarm to continue waiting for connection
         return -MONITOR_CONNECTION_PERIOD_MS * 1000;
@@ -88,7 +90,11 @@ int64_t Wifi::monitorConnection(alarm_id_t id, void *user_data)
     {
         // Call callbacks that were waiting for a connection and forget them.
         for (const auto &c : m_connectionFinishedCallbacks)
-            c(res == CYW43_LINK_UP);
+        {
+            TRACE << "monitorConnection link status that got us here - res:" << res;  
+            TRACE << "monitorConnection, returning status to Callback, returning 1 if res=+3, otherwise 0";
+            c(res == CYW43_LINK_UP);  // This is not an assignment, it is a conditional.  If res is a +3, then boolean is 1
+        }    
         m_connectionFinishedCallbacks.clear();
 
         // Do not reschedule
@@ -97,7 +103,7 @@ int64_t Wifi::monitorConnection(alarm_id_t id, void *user_data)
     }
 }
 
-bool Wifi::handleConnectResult(int res)
+bool Wifi::handleConnectResult(int res)  // this handles the status of the connectAsync request, not whether connection worked
 {
     switch(res)
     {
@@ -120,9 +126,9 @@ Wifi::Status Wifi::linkStatus()
     if (m_connectResult != OK && m_connectResult != Unknown)
         return m_connectResult;
 
-//    TRACE << "cyw43_tcpip_link_status";
+    TRACE << "cyw43_tcpip_link_status";
     int res = cyw43_tcpip_link_status(&cyw43_state, CYW43_ITF_STA);
-//    TRACE << "res:" << res;
+    TRACE << "res:" << res;
 
     switch(res)
     {

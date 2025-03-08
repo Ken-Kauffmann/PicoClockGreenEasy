@@ -87,7 +87,8 @@ enum class TextId
     Sunset,         
     CityName,       
     SyncWxNow,      
-    LastUpdate,     
+    LastUpdate,
+    SoftReset,     
 
     TextCount
 };

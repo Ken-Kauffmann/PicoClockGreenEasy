@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <time.h>
+#include "hardware/watchdog.h"
 
 class Weather
 {
@@ -28,7 +29,8 @@ public:
     };                                                  
 
     void syncWxNow();                                                       // Intermediate stub.  Called by ClockUi
-    void wxInfo(WxInfo &info);                                              // Used by WeatherInfo
+    void wxInfo(WxInfo &info);
+    void software_reset();                                                  // Action in Weather submenu
 
 private:
     void onWifiConnectionFinished(bool success);

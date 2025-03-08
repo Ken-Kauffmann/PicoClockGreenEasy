@@ -72,7 +72,8 @@ ClockUi::ClockUi() : m_clock(Display::FRAME_RATE, m_settings)
     #ifdef INCLUDE_WEATHER    
     Submenu *wxSubmenu =                                                            
         addFunctionAndReturnPtr<Submenu>(uiText(TextId::Weather), &m_rootMenu);     
-        m_wxMenu = wxSubmenu->menu();                                               // Save for use with AutoScroll
+        m_wxMenu = wxSubmenu->menu();                                               // Save for use with Weather AutoScroll
+        m_WxMenuIdx = m_rootMenu.size() - 1;                                        // Save index of Weather submenu within root menu
     #endif        
     addFunction<Options>();
 
@@ -112,6 +113,7 @@ ClockUi::ClockUi() : m_clock(Display::FRAME_RATE, m_settings)
     wxSubmenu->addFunction<WeatherInfo>(this, WeatherInfo::WxSunrise, &m_weather);          // Index value = 7
     wxSubmenu->addFunction<WeatherInfo>(this, WeatherInfo::WxSunset, &m_weather);           // Index value = 8
     wxSubmenu->addFunction<WeatherInfo>(this, WeatherInfo::WxDateTime, &m_weather);         // Index value = 9
+    wxSubmenu->addFunction<Action>(this, uiText(TextId::SoftReset), std::bind(&Weather::software_reset, &m_weather));
     
     #endif
 
@@ -120,6 +122,14 @@ ClockUi::ClockUi() : m_clock(Display::FRAME_RATE, m_settings)
         m_lastUsedTimeFunction = m_curFuncIdx;
     else
         m_lastUsedTimeFunction = hourMinBarFuncIdx; // Default to hour:min:bar
+
+    #ifdef INCLUDE_WEATHER
+    auto &curFunc2 = *m_currentMenu->at(m_WxMenuIdx);  // This is temporary.  This activates the Weather submenu
+    curFunc2.activate();                               // and adds the Exit function
+    // While this is intended to call the Submenu activate routine, it also appears to call the Weather::Weather routine.  This causes
+    // the http onRequestComplete code to be executed before wireless is initiated.  This appears to work OK, although I have seen
+    // instances where the http call gets stalled until the next http call.     
+    #endif        
 
     m_currentMenu->at(m_curFuncIdx)->onSelect();
 
