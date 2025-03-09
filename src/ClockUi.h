@@ -8,6 +8,7 @@
 #include "Clock.h"
 #include "Settings.h"
 #include "Functions/AbstractFunction.h"
+#include "hardware/watchdog.h"
 #ifdef INCLUDE_WEATHER
 #include "Weather.h"
 #endif

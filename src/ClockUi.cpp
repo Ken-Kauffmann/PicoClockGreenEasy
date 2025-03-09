@@ -113,7 +113,7 @@ ClockUi::ClockUi() : m_clock(Display::FRAME_RATE, m_settings)
     wxSubmenu->addFunction<WeatherInfo>(this, WeatherInfo::WxSunrise, &m_weather);          // Index value = 7
     wxSubmenu->addFunction<WeatherInfo>(this, WeatherInfo::WxSunset, &m_weather);           // Index value = 8
     wxSubmenu->addFunction<WeatherInfo>(this, WeatherInfo::WxDateTime, &m_weather);         // Index value = 9
-    wxSubmenu->addFunction<Action>(this, uiText(TextId::SoftReset), std::bind(&Weather::software_reset, &m_weather));
+    wxSubmenu->addFunction<Action>(this, uiText(TextId::SoftReset), std::bind(&Weather::software_reset, &m_weather));  // We may not need this function anymore
     
     #endif
 
@@ -124,11 +124,15 @@ ClockUi::ClockUi() : m_clock(Display::FRAME_RATE, m_settings)
         m_lastUsedTimeFunction = hourMinBarFuncIdx; // Default to hour:min:bar
 
     #ifdef INCLUDE_WEATHER
-    auto &curFunc2 = *m_currentMenu->at(m_WxMenuIdx);  // This is temporary.  This activates the Weather submenu
-    curFunc2.activate();                               // and adds the Exit function
+    if (watchdog_caused_reboot())                              // This does not always work as expected.  Flag not cleared on BootSel, only clean power cycle
+        {
+            TRACE << "Watchdog caused a reboot, resetting Weather menu";
+            auto &curFunc2 = *m_currentMenu->at(m_WxMenuIdx);  // This activates the Weather submenu
+            curFunc2.activate();                               // and adds the Exit function
     // While this is intended to call the Submenu activate routine, it also appears to call the Weather::Weather routine.  This causes
     // the http onRequestComplete code to be executed before wireless is initiated.  This appears to work OK, although I have seen
-    // instances where the http call gets stalled until the next http call.     
+    // instances where the http call gets stalled until the next http call.
+        }
     #endif        
 
     m_currentMenu->at(m_curFuncIdx)->onSelect();
@@ -163,6 +167,7 @@ FunctionType *ClockUi::addFunctionAndReturnPtr(CtorParams... ctorParams)
 void ClockUi::onFrameCallback()
 {
     // Make the clock and some functions tick
+    watchdog_update();                                  // Feed the watchdog
     bool clockAdjusted = false;
     int tempInt;
     Settings::AlarmMode reachedAlarmMode = Settings::AlarmMode::Off;
