@@ -100,6 +100,15 @@ void WeatherInfo::renderFrame(
                 uiText(TextId::CityName) + 
                 (info.cityName);
             break;
+        case ClockStart:   
+            Wxtm = settings().starttm; 
+
+            text =
+                uiText(TextId::ClockStart) + timeToString(Wxtm, morning) +
+                " " + dateToString(Wxtm); 
+            putAmPmIndicators(frame, morning);
+
+            break;        
     }
 
     renderScrollingText(frame, fullRefresh, text);

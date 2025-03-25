@@ -88,7 +88,8 @@ enum class TextId
     CityName,       
     SyncWxNow,      
     LastUpdate,
-    SoftReset,     
+    SoftReset,
+    ClockStart,     
 
     TextCount
 };

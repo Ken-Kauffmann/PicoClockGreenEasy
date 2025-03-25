@@ -80,7 +80,8 @@ namespace
             "Weather for: ",            
             "Update Weather Now",       
             "Last Update: ",
-            "Software Reset",                        
+            "Software Reset",
+            "Clock Started: ",                        
 
     };
 }

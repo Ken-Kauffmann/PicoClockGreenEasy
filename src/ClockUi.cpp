@@ -114,6 +114,7 @@ ClockUi::ClockUi() : m_clock(Display::FRAME_RATE, m_settings)
     wxSubmenu->addFunction<WeatherInfo>(this, WeatherInfo::WxSunset, &m_weather);           // Index value = 8
     wxSubmenu->addFunction<WeatherInfo>(this, WeatherInfo::WxDateTime, &m_weather);         // Index value = 9
     wxSubmenu->addFunction<Action>(this, uiText(TextId::SoftReset), std::bind(&Weather::software_reset, &m_weather));  // We may not need this function anymore
+    wxSubmenu->addFunction<WeatherInfo>(this, WeatherInfo::ClockStart, &m_weather);         // Index value = 11
     
     #endif
 

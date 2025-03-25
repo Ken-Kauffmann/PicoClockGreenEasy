@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <time.h>
 
 class Settings
 {
@@ -79,6 +80,7 @@ public:
         int brightnessBright = 100;
         DateFormat dateFormat = DateFormat::MonthDashDay;
         SyncSource syncSource = SyncSource::Rtc;
+        tm starttm = {};
     };
 
     Settings();

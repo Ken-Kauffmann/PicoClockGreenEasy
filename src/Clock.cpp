@@ -16,6 +16,9 @@ Clock::Clock(int tickPerSec, Settings &settings) :
     {
         tm rtcTime = startRtcSync();
         setFromRtcTime(rtcTime);
+        time_t timeConsideringDst2 = m_dst.considerDst(m_time);
+        rtcTime = *localtime(&timeConsideringDst2); // reusing rtcTime
+        m_settings.modify().starttm = rtcTime;      // store the time that the clock was initialized
     } else
     {
         TRACE << "No RTC available";

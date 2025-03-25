@@ -18,6 +18,7 @@ public:
         WxSunset,
         WxName,  // Not currently supported in OpenWeatherMap 3.0 API
         WxDateTime,
+        ClockStart,
     };
     
     WeatherInfo(ClockUi *clockUi, Entry entry, Weather *weather) : AbstractFunction(clockUi), m_entry(entry), m_weather(weather)
